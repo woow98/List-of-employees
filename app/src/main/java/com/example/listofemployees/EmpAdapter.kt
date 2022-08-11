@@ -1,12 +1,13 @@
 package com.example.listofemployees
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class RecyclerAdapter(private val empList:ArrayList<Employees>)
+class RecyclerAdapter( val items: ArrayList<Employees>)
     : RecyclerView.Adapter<RecyclerAdapter.ViewHolder>() {
 
     var onItemClick:((Employees)->Unit)?=null
@@ -23,7 +24,7 @@ class RecyclerAdapter(private val empList:ArrayList<Employees>)
     }
 
     override fun onBindViewHolder(holder: RecyclerAdapter.ViewHolder, position: Int) {
-        val emp = empList[position]
+        val emp = items.get(position)
         holder.itemFio.text = emp.fio
         holder.itemDepart.text = emp.depart
         holder.itemView.setOnClickListener{
@@ -33,7 +34,7 @@ class RecyclerAdapter(private val empList:ArrayList<Employees>)
     }
 
     override fun getItemCount(): Int {
-        return empList.size
+        return items.size
     }
 
 

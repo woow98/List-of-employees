@@ -5,6 +5,13 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.IOException
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets.UTF_8
+import kotlin.text.Charsets.UTF_8
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,21 +28,29 @@ class MainActivity : AppCompatActivity() {
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager= LinearLayoutManager(this)
 
-        empList = ArrayList()
-
-        empList.add(Employees("Никифоров Прохор Станиславович","Отдел кадров","+79870956784", "03.12.1999"))
-        empList.add(Employees("Титова Наоми Адольфовна","Финансовый отдел","+79053458746", "14.09.2000"))
-        empList.add(Employees("Гусев Максим Святославович","Бухгалтерия","+78763462233", "31.07.1995"))
-        empList.add(Employees("Крылова Нила Святославовна","Канцелярия","+79074458070", "22.03.1986"))
-        empList.add(Employees("Зиновьев Орест Максович","Архив","+79010080501", "01.05.1997"))
-        empList.add(Employees("Меркушева Аделина Созоновна","Отдел продаж","+79058761122", "10.10.1999"))
-        empList.add(Employees("Рябов Май Артёмович","Отдел рекламы и PR","+79873327845", "11.09.1980"))
-        empList.add(Employees("Дмитриева Веселина Святославовна","Отдел охраны труда","+79871129402", "29.04.1995"))
-        empList.add(Employees("Григорьев Святослав Геласьевич","Экономический отдел","+79042126734", "03.01.2000"))
-        empList.add(Employees("Евсеева Фелиция Парфеньевна","Отдел закупок","+79053782687", "19.07.1992"))
 
         empAdapter = RecyclerAdapter(empList)
         recyclerView.adapter = empAdapter
+
+        val employeesList: ArrayList<Employees> = ArrayList()
+
+        try{
+            val obj = JSONObject(getJSONFromAssets()!!)
+            val empArray =obj.getJSONArray("employees")
+            for(i in 0 until empArray.length()){
+                val employees = empArray.getJSONObject(i)
+                val fio = employees.getString("fio")
+                val depart = employees.getString("depart")
+                val phoneNum = employees.getString("phoneNum")
+                val age = employees.getString("age")
+                val empDetails =
+                    Employees(fio,depart,phoneNum,age)
+                employeesList.add(empDetails)
+            }
+        }
+        catch(e: JSONException){
+            e.printStackTrace()
+        }
 
 
         empAdapter.onItemClick={
@@ -43,5 +58,23 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("employees", it)
             startActivity(intent)
         }
+    }
+    private fun getJSONFromAssets(): String? {
+        var json: String? = null
+        //ОШИБКА!!
+        val charset: Charset = Charset.UTF_8
+        try {
+            val empJSONFile = assets.open("employees.json")
+            val size = empJSONFile.available()
+            val buffer = ByteArray(size)
+            empJSONFile.read(buffer)
+            empJSONFile.close()
+            json = String(buffer, charset)
+        }
+        catch(ex: IOException){
+            ex.printStackTrace()
+            return null
+        }
+        return json
     }
 }
